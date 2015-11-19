@@ -450,10 +450,10 @@ int main(int argc, char* argv[]) {
             double dot = Vdot(body_axis, NodeFirst->D);
             printf("Dot product = %e\n", dot);
 
-            ////ChMatrix<> Cp = constraint_hinge->GetC();
-            ////printf("Point constraint violations:      %12.4e  %12.4e  %12.4e\n", Cp.GetElement(0, 0), Cp.GetElement(1, 0), Cp.GetElement(2,0));
-            ////ChMatrix<> Cd = constraintDir->GetC();
-            ////printf("Direction constraint violations:  %12.4e  %12.4e\n", Cd.GetElement(0, 0), Cd.GetElement(1, 0));
+            ChMatrix<> Cp = constraint_hinge->GetC();
+            printf("Point constraint violations:      %12.4e  %12.4e  %12.4e\n", Cp.GetElement(0, 0), Cp.GetElement(1, 0), Cp.GetElement(2,0));
+            ChMatrix<> Cd = constraintDir->GetC();
+            printf("Direction constraint violations:  %12.4e  %12.4e\n", Cd.GetElement(0, 0), Cd.GetElement(1, 0));
         }
 
         if (include_joints) {
