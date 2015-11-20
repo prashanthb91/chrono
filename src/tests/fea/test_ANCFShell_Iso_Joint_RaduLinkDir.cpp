@@ -47,6 +47,7 @@ ChSharedPtr<ChLinkPointFrame> constraint_hinge;
 ChSharedPtr<ChLinkDirFrame> constraintDir;
 
 // Output data
+bool print_data = false;
 bool save_data = false;
 utils::Data m_data;
 
@@ -422,49 +423,51 @@ int main(int argc, char* argv[]) {
     for (int it = 0; it < num_steps; it++) {
         my_system.DoStepDynamics(time_step);
 
-        std::cout << "\nTime t = " << my_system.GetChTime() << "s \n";
+        if (print_data) {
+            std::cout << "\nTime t = " << my_system.GetChTime() << "s \n";
 
-        if (include_bodies) {
-            printf("Body_2 position: %12.4e  %12.4e  %12.4e\n", Body_2->coord.pos.x, Body_2->coord.pos.y,
-                   Body_2->coord.pos.z);
-            printf("Body_3 position: %12.4e  %12.4e  %12.4e\n", Body_3->coord.pos.x, Body_3->coord.pos.y,
-                   Body_3->coord.pos.z);
-            ChVector<> tip = Body_3->TransformPointLocalToParent(ChVector<>(0.25, 0, 0));
-            printf("Body_3 tip:      %12.4e  %12.4e  %12.4e\n", tip.x, tip.y, tip.z);
-        }
+            if (include_bodies) {
+                printf("Body_2 position: %12.4e  %12.4e  %12.4e\n", Body_2->coord.pos.x, Body_2->coord.pos.y,
+                    Body_2->coord.pos.z);
+                printf("Body_3 position: %12.4e  %12.4e  %12.4e\n", Body_3->coord.pos.x, Body_3->coord.pos.y,
+                    Body_3->coord.pos.z);
+                ChVector<> tip = Body_3->TransformPointLocalToParent(ChVector<>(0.25, 0, 0));
+                printf("Body_3 tip:      %12.4e  %12.4e  %12.4e\n", tip.x, tip.y, tip.z);
+            }
 
-        if (include_mesh) {
-            // std::cout << "nodetip->pos.z = " << Node4->pos.z << "\n";
-            printf("Node position:   %12.4e  %12.4e  %12.4e\n", NodeFirst->pos.x, NodeFirst->pos.y, NodeFirst->pos.z);
-            printf("Direction of node:  %12.4e  %12.4e  %12.4e\n", NodeFirst->D.x, NodeFirst->D.y, NodeFirst->D.z);
-        }
+            if (include_mesh) {
+                // std::cout << "nodetip->pos.z = " << Node4->pos.z << "\n";
+                printf("Node position:   %12.4e  %12.4e  %12.4e\n", NodeFirst->pos.x, NodeFirst->pos.y, NodeFirst->pos.z);
+                printf("Direction of node:  %12.4e  %12.4e  %12.4e\n", NodeFirst->D.x, NodeFirst->D.y, NodeFirst->D.z);
+            }
 
-        if (include_constraints) {
-            // Get direction of constraint (in body local frame) and convert to global frame
-            ChVector<> dirB = Body_3->TransformDirectionLocalToParent(constraintDir->GetDirection());
-            printf("Direction on body:  %12.4e  %12.4e  %12.4e\n", dirB.x, dirB.y, dirB.z);
-            // Direction along the body
-            ChVector<> body_axis = Body_3->TransformDirectionLocalToParent(ChVector<>(0.25, 0, 0));
-            printf("Body axis dir:      %12.4e  %12.4e  %12.4e\n", body_axis.x, body_axis.y, body_axis.z);
-            // Body axis should always be perpendicular to node normal
-            double dot = Vdot(body_axis, NodeFirst->D);
-            printf("Dot product = %e\n", dot);
+            if (include_constraints) {
+                // Get direction of constraint (in body local frame) and convert to global frame
+                ChVector<> dirB = Body_3->TransformDirectionLocalToParent(constraintDir->GetDirection());
+                printf("Direction on body:  %12.4e  %12.4e  %12.4e\n", dirB.x, dirB.y, dirB.z);
+                // Direction along the body
+                ChVector<> body_axis = Body_3->TransformDirectionLocalToParent(ChVector<>(0.25, 0, 0));
+                printf("Body axis dir:      %12.4e  %12.4e  %12.4e\n", body_axis.x, body_axis.y, body_axis.z);
+                // Body axis should always be perpendicular to node normal
+                double dot = Vdot(body_axis, NodeFirst->D);
+                printf("Dot product = %e\n", dot);
 
-            ChMatrix<> Cp = constraint_hinge->GetC();
-            printf("Point constraint violations:      %12.4e  %12.4e  %12.4e\n", Cp.GetElement(0, 0), Cp.GetElement(1, 0), Cp.GetElement(2,0));
-            ChMatrix<> Cd = constraintDir->GetC();
-            printf("Direction constraint violations:  %12.4e  %12.4e\n", Cd.GetElement(0, 0), Cd.GetElement(1, 0));
-        }
+                ChMatrix<> Cp = constraint_hinge->GetC();
+                printf("Point constraint violations:      %12.4e  %12.4e  %12.4e\n", Cp.GetElement(0, 0), Cp.GetElement(1, 0), Cp.GetElement(2, 0));
+                ChMatrix<> Cd = constraintDir->GetC();
+                printf("Direction constraint violations:  %12.4e  %12.4e\n", Cd.GetElement(0, 0), Cd.GetElement(1, 0));
+            }
 
-        if (include_joints) {
-            ChMatrix<>* C12 = my_link_12->GetC();
-            printf("Weld joint constraints: %12.4e  %12.4e  %12.4e  %12.4e  %12.4e  %12.4e\n", C12->GetElement(0, 0),
-                   C12->GetElement(1, 0), C12->GetElement(2, 0), C12->GetElement(3, 0), C12->GetElement(4, 0),
-                   C12->GetElement(5, 0));
+            if (include_joints) {
+                ChMatrix<>* C12 = my_link_12->GetC();
+                printf("Weld joint constraints: %12.4e  %12.4e  %12.4e  %12.4e  %12.4e  %12.4e\n", C12->GetElement(0, 0),
+                    C12->GetElement(1, 0), C12->GetElement(2, 0), C12->GetElement(3, 0), C12->GetElement(4, 0),
+                    C12->GetElement(5, 0));
 
-            ChMatrix<>* C23 = my_link_23->GetC();
-            printf("Rev joint constraints:  %12.4e  %12.4e  %12.4e  %12.4e  %12.4e\n", C23->GetElement(0, 0),
-                   C23->GetElement(1, 0), C23->GetElement(2, 0), C23->GetElement(3, 0), C23->GetElement(4, 0));
+                ChMatrix<>* C23 = my_link_23->GetC();
+                printf("Rev joint constraints:  %12.4e  %12.4e  %12.4e  %12.4e  %12.4e\n", C23->GetElement(0, 0),
+                    C23->GetElement(1, 0), C23->GetElement(2, 0), C23->GetElement(3, 0), C23->GetElement(4, 0));
+            }
         }
 
         SaveData(my_system, csv, it);
