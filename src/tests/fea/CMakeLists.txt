@@ -8,6 +8,7 @@ set(FEA_MKL_TESTS
     test_Antonio
     test_ANCFShell_Iso_Joint_Radu_Bullet
     test_ANCFShell_Iso_Joint_RaduLinkDir
+    test_ANCFShell_LoadCustom_Alessandro
 )
 
 message(STATUS "Additional test programs for FEA module...")
