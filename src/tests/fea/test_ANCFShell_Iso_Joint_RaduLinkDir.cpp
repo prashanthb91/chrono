@@ -47,7 +47,7 @@ ChSharedPtr<ChLinkPointFrame> constraint_hinge;
 ChSharedPtr<ChLinkDirFrame> constraintDir;
 
 // Output data
-bool print_data = false;
+bool print_data = true;
 bool save_data = false;
 utils::Data m_data;
 
@@ -452,9 +452,9 @@ int main(int argc, char* argv[]) {
                 double dot = Vdot(body_axis, NodeFirst->D);
                 printf("Dot product = %e\n", dot);
 
-                ChMatrix<> Cp = constraint_hinge->GetC();
+                ChMatrixNM<double, 3, 1> Cp = constraint_hinge->GetC();
                 printf("Point constraint violations:      %12.4e  %12.4e  %12.4e\n", Cp.GetElement(0, 0), Cp.GetElement(1, 0), Cp.GetElement(2, 0));
-                ChMatrix<> Cd = constraintDir->GetC();
+                ChMatrixNM<double, 2, 1> Cd = constraintDir->GetC();
                 printf("Direction constraint violations:  %12.4e  %12.4e\n", Cd.GetElement(0, 0), Cd.GetElement(1, 0));
             }
 
