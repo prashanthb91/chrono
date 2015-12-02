@@ -6,6 +6,7 @@ SET(TESTS
     test_coords
     test_math
     test_sharedptr
+    test_matrix
     #test_stream
 )
 
