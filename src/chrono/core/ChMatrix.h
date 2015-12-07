@@ -31,6 +31,7 @@
 #include "core/ChStream.h"
 #include "core/ChException.h"
 #include <emmintrin.h>
+#include <mmintrin.h>
 
 namespace chrono {
 
@@ -498,14 +499,28 @@ class ChMatrix {
             ElementN(nel) = (Real)(matra.ElementN(nel) + matrb.ElementN(nel));
             
     }
-    /*void double_vec_MatrAdd(const ChMatrix<double>& matra, const ChMatrix<double>& matrb) {
-        for (int nel = 0; nel < rows * columns; nel +=2){
-            __m128d elem_a = _mm_load_pd(matra.GetAddress() +nel);
-            __m128d elem_b = _mm_load_pd(matrb.GetAddress() + nel);
-            __m128d res = _mm_add_pd(elem_a, elem_b);
-            _mm_store_pd(GetAddress()+nel,res);
+    template <class RealB, class RealC>
+    void float_vec_MatrAdd(const ChMatrix<RealB>& matra, const ChMatrix<RealC>& matrb) {
+        const float *a_addr = (const float*)matra.GetAddress();
+        const float *b_addr = (const float*)matrb.GetAddress();
+        float* addr = (float*)GetAddress();
+        unsigned int tot_elem = rows*columns; 
+        //For matrices of length which are not a multiple of 4
+        unsigned int rem_elem = tot_elem - tot_elem%4;
+        int nel;
+        for (int nel = 0; nel < rem_elem; nel +=4){
+            __m128 elem_a = _mm_load_ps(a_addr + nel);
+            __m128 elem_b = _mm_load_ps(b_addr + nel);
+            __m128 res = _mm_add_ps(elem_a, elem_b);
+            _mm_store_ps(addr + nel,res);
         }
-    }*/
+        while(nel < tot_elem)
+        {
+            ElementN(nel) = (Real)(matra.ElementN(nel) + matrb.ElementN(nel));
+            nel++;
+        }
+        
+    }
     
     template <class RealB, class RealC>
     void MatrAdd(const ChMatrix<RealB>& matra, const ChMatrix<RealC>& matrb) {
@@ -513,8 +528,8 @@ class ChMatrix {
         assert(this->columns == matrb.GetColumns() && this->rows == matrb.GetRows());
         if(std::is_same<RealB, double>::value && std::is_same<RealC, double>::value)
           double_vec_MatrAdd(matra, matrb);
-      //  else if(std::is_same<RealB, float>::value && std::is_same<RealC, float>::value)
-        //  float_vec_MatrAdd(matra, matrb);
+        else if(std::is_same<RealB, float>::value && std::is_same<RealC, float>::value)
+          float_vec_MatrAdd(matra, matrb);
         else {
         for (int nel = 0; nel < rows * columns; ++nel)
             ElementN(nel) = (Real)(matra.ElementN(nel) + matrb.ElementN(nel));
@@ -522,12 +537,58 @@ class ChMatrix {
     }
 
     /// Subtract two matrices, and stores the result in "this" matrix: [this]=[A]-[B].
+    void double_vec_MatrSub(const ChMatrix<double>& matra, const ChMatrix<double>& matrb) {
+        const double *a_addr = matra.GetAddress();
+        const double *b_addr = matrb.GetAddress();
+        double* addr = GetAddress();
+        unsigned int tot_elem = rows*columns; 
+        //For matrices of length which are not a multiple of 2
+        unsigned int rem_elem = tot_elem - tot_elem%2;
+        int nel;
+        for (nel = 0; nel < rem_elem; nel +=2){
+            __m128d elem_a = _mm_load_pd(a_addr + nel);
+            __m128d elem_b = _mm_load_pd(b_addr + nel);
+            __m128d res = _mm_sub_pd(elem_a, elem_b);
+            _mm_store_pd(addr+nel,res);
+        }
+        if(rem_elem != tot_elem)
+            ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
+            
+    }
+    template <class RealB, class RealC>
+    void float_vec_MatrSub(const ChMatrix<RealB>& matra, const ChMatrix<RealC>& matrb) {
+        const float *a_addr = (const float*)matra.GetAddress();
+        const float *b_addr = (const float*)matrb.GetAddress();
+        float* addr = (float*)GetAddress();
+        unsigned int tot_elem = rows*columns; 
+        //For matrices of length which are not a multiple of 4
+        unsigned int rem_elem = tot_elem - tot_elem%4;
+        int nel;
+        for (int nel = 0; nel < rem_elem; nel +=4){
+            __m128 elem_a = _mm_load_ps(a_addr + nel);
+            __m128 elem_b = _mm_load_ps(b_addr + nel);
+            __m128 res = _mm_sub_ps(elem_a, elem_b);
+            _mm_store_ps(addr + nel,res);
+        }
+        while(nel < tot_elem)
+        {
+            ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
+            nel++;
+        }
+        
+    }
     template <class RealB, class RealC>
     void MatrSub(const ChMatrix<RealB>& matra, const ChMatrix<RealC>& matrb) {
         assert(matra.GetColumns() == matrb.GetColumns() && matra.rows == matrb.GetRows());
         assert(this->columns == matrb.GetColumns() && this->rows == matrb.GetRows());
+        if(std::is_same<RealB, double>::value && std::is_same<RealC, double>::value)
+          double_vec_MatrSub(matra, matrb);
+        else if(std::is_same<RealB, float>::value && std::is_same<RealC, float>::value)
+          float_vec_MatrSub(matra, matrb);
+        else {
         for (int nel = 0; nel < rows * columns; ++nel)
             ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
+        }
     }
 
     /// Increments this matrix with another matrix A, as: [this]+=[A]
