@@ -7,6 +7,7 @@ SET(TESTS
     test_math
     test_sharedptr
     #test_stream
+    test_matrix
 )
 
 MESSAGE(STATUS "Unit test programs for CORE module...")
