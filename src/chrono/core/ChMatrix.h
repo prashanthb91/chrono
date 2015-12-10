@@ -927,9 +927,11 @@ class ChMatrix {
 		tot = double_vec_MatrDot(ma, mb);
 		return tot;
 	}
-        for (int i = 0; i < ma->GetRows(); ++i)
-            tot += (Real)(ma->ElementN(i) * mb->ElementN(i));
-        return tot;
+        else {
+        	for (int i = 0; i < ma->GetRows(); ++i)
+            		tot += (Real)(ma->ElementN(i) * mb->ElementN(i));
+        	return tot;
+	}
     }
 
     /// Transpose this matrix in place
