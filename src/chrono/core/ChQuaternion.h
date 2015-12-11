@@ -30,6 +30,9 @@
 
 #include "core/ChVector.h"
 #include "ChApiCE.h"
+#include <mmintrin.h>
+#include <emmintrin.h>
+
 
 namespace chrono {
 
@@ -46,7 +49,7 @@ namespace chrono {
 ///  For example, for a declaration, you can write "ChQuaternion<double> foo;",
 /// as well as "Quaternion foo;" (less typing effort for the second..)
 ///
-
+#pragma pack(push,4)
 template <class Real = double>
 class ChQuaternion {
   public:
@@ -254,10 +257,24 @@ class ChQuaternion {
 
     /// Sets the four values of the quaternion at once
     void Set(const Real ne0, const Real ne1, const Real ne2, const Real ne3) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d v1 = _mm_set_pd(ne0,ne1);
+         __m128d v2 = _mm_set_pd(ne2,ne3);
+         _mm_store_pd((double*)&e0, v1);
+         _mm_store_pd((double*)&e2, v2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 v = _mm_set_ps(ne0,ne1,ne2,ne3);
+         _mm_store_ps((float*)&e0, v);
+       }         
+       else {
         e0 = ne0;
         e1 = ne1;
         e2 = ne2;
         e3 = ne3;
+       }
     }
 
     /// Sets the quaternion as a copy of another quaternion
@@ -270,10 +287,24 @@ class ChQuaternion {
 
     /// Sets the quaternion with four components as a sample scalar
     void Set(const Real p) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d v1 = _mm_set_pd(p,p);
+         __m128d v2 = _mm_set_pd(p,p);
+         _mm_store_pd((double*)&e0, v1);
+         _mm_store_pd((double*)&e2, v2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 v = _mm_set_ps(p,p,p,p);
+         _mm_store_ps((float*)&e0, v);
+       }         
+       else {
         e0 = p;
         e1 = p;
         e2 = p;
         e3 = p;
+       }
     }
 
     /// Sets the quaternion as a null quaternion
@@ -310,19 +341,59 @@ class ChQuaternion {
     /// The quaternion becomes the sum of the two quaternions A and B:
     /// this=A+B
     void Add(const ChQuaternion<Real> A, const ChQuaternion<Real> B) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d a1 = _mm_load_pd((double*)&A.e0);
+         __m128d a2 = _mm_load_pd((double*)&A.e2);
+         __m128d b1 = _mm_load_pd((double*)&B.e0);
+         __m128d b2 = _mm_load_pd((double*)&B.e2);
+         __m128d res1 = _mm_add_pd(a1,b1);
+         __m128d res2 = _mm_add_pd(a2,b2);
+         _mm_store_pd((double*)&e0, res1);
+         _mm_store_pd((double*)&e2, res2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 a = _mm_load_ps((float*)&A.e0);
+         __m128 b = _mm_load_ps((float*)&B.e0);
+         __m128 res1 = _mm_add_ps(a,b);
+         _mm_store_ps((float*)&e0, res1);
+       }         
+       else {
         e0 = A.e0 + B.e0;
         e1 = A.e1 + B.e1;
         e2 = A.e2 + B.e2;
         e3 = A.e3 + B.e3;
+       }
     }
 
     /// The quaternion becomes the difference of the two quaternions A and B:
     /// this=A-B
     void Sub(const ChQuaternion<Real> A, const ChQuaternion<Real> B) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d a1 = _mm_load_pd((double*)&A.e0);
+         __m128d a2 = _mm_load_pd((double*)&A.e2);
+         __m128d b1 = _mm_load_pd((double*)&B.e0);
+         __m128d b2 = _mm_load_pd((double*)&B.e2);
+         __m128d res1 = _mm_sub_pd(a1,b1);
+         __m128d res2 = _mm_sub_pd(a2,b2);
+         _mm_store_pd((double*)&e0, res1);
+         _mm_store_pd((double*)&e2, res2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 a = _mm_load_ps((float*)&A.e0);
+         __m128 b = _mm_load_ps((float*)&B.e0);
+         __m128 res1 = _mm_sub_ps(a,b);
+         _mm_store_ps((float*)&e0, res1);
+       }         
+       else {
         e0 = A.e0 - B.e0;
         e1 = A.e1 - B.e1;
         e2 = A.e2 - B.e2;
         e3 = A.e3 - B.e3;
+       }
     }
 
     /// The quaternion becomes the quaternion product of the two quaternions A and B:
@@ -344,19 +415,59 @@ class ChQuaternion {
     /// The quaternion becomes the product of a quaternion A and a scalar v:
     /// this=A*v
     void Mul(const ChQuaternion<Real> A, const Real v) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d a1 = _mm_load_pd((double*)&A.e0);
+         __m128d a2 = _mm_load_pd((double*)&A.e2);
+         __m128d v1 = _mm_set_pd(v,v);
+         __m128d v2 = _mm_set_pd(v,v);
+         __m128d res1 = _mm_mul_pd(a1,v1);
+         __m128d res2 = _mm_mul_pd(a2,v2);
+         _mm_store_pd((double*)&e0, res1);
+         _mm_store_pd((double*)&e2, res2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 a = _mm_load_ps((float*)&A.e0);
+         __m128 v1 = _mm_set_ps(v,v,v,v);
+         __m128 res1 = _mm_mul_ps(a,v1);
+         _mm_store_ps((float*)&e0, res1);
+       }         
+       else {
         e0 = A.e0 * v;
         e1 = A.e1 * v;
         e2 = A.e2 * v;
         e3 = A.e3 * v;
+       }
     }
 
     /// The quaternion is multiplied by a scalar factor 's'
     /// this*=v
     void Scale(const Real v) {
+       if(std::is_same<Real,double>::value)
+       {
+         __m128d a1 = _mm_load_pd((double*)&e0);
+         __m128d a2 = _mm_load_pd((double*)&e2);
+         __m128d v1 = _mm_set_pd(v,v);
+         __m128d v2 = _mm_set_pd(v,v);
+         __m128d res1 = _mm_mul_pd(a1,v1);
+         __m128d res2 = _mm_mul_pd(a2,v2);
+         _mm_store_pd((double*)&e0, res1);
+         _mm_store_pd((double*)&e2, res2);
+       }         
+       else if(std::is_same<Real,float>::value)
+       {
+         __m128 a = _mm_load_ps((float*)&e0);
+         __m128 v1 = _mm_set_ps(v,v,v,v);
+         __m128 res1 = _mm_mul_ps(a,v1);
+         _mm_store_ps((float*)&e0, res1);
+       }         
+       else {
         e0 *= v;
         e1 *= v;
         e2 *= v;
         e3 *= v;
+       }
     }
 
     /// Computes the euclidean norm of the quaternion,
@@ -686,6 +797,7 @@ class ChQuaternion {
     }
 
 };
+#pragma pack(pop)
 
 /// Shortcut for faster use of typical double-precision quaternion.
 ///  Instead of writing    "ChQuaternion<double> foo;"   you can write
