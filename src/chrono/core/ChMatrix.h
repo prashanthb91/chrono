@@ -32,7 +32,7 @@
 #include "core/ChException.h"
 #include <emmintrin.h>
 #include <mmintrin.h>
-
+#include <smmintrin.h>
 namespace chrono {
 
 //
@@ -590,36 +590,236 @@ class ChMatrix {
             ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
         }
     }
+    
 
-    /// Increments this matrix with another matrix A, as: [this]+=[A]
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //           vec_MatrInc(const ChMatrix<double>& matra)                              		      //
+    /// Increments this matrix with another matrix A, as: [this]+=[A]. But vectorized opeartions for speedup. //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <class RealB>
+    void double_vec_MatrInc(const ChMatrix<RealB>& matra) {
+	double *addr = (double*)GetAddress();
+        const double* a_addr = (const double*) matra.GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%2;
+        int nel;
+        for(nel = 0; nel<rem_elem; nel += 2) {
+		__m128d elem_a = _mm_load_pd(a_addr+nel);
+                __m128d elem   = _mm_load_pd(addr + nel);
+		__m128d result = _mm_add_pd(elem_a, elem);
+                _mm_store_pd(addr+nel, result);
+        }
+        if(rem_elem != tot_elem) {
+ 		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //           vec_MatrInc(const ChMatrix<float>&matra)                              			      //
+    /// Increments this matrix with another matrix A, as: [this]+=[A]. But vectorized opeartions for speedup. //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    template <class RealB>
+    void float_vec_MatrInc(const ChMatrix<RealB>& matra) {
+	float *addr = (float *)GetAddress();
+        const float* a_addr = (const float*)matra.GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
+        int nel;
+        for(nel = 0; nel<rem_elem; nel += 2) {
+		__m128 elem_a = _mm_load_ps(a_addr+nel);
+                __m128 elem   = _mm_load_ps(addr + nel);
+		__m128 result = _mm_add_ps(elem_a, elem);
+                _mm_store_ps(addr+nel, result);
+        }
+        if(rem_elem != tot_elem) {
+                for(nel=rem_elem; nel<tot_elem; nel++){
+	 		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+     		}
+        }
+    }
+
+
     template <class RealB>
     void MatrInc(const ChMatrix<RealB>& matra) {
         assert(matra.GetColumns() == columns && matra.GetRows() == rows);
-        for (int nel = 0; nel < rows * columns; ++nel)
-            ElementN(nel) += (Real)matra.ElementN(nel);
+	if(std::is_same<RealB, double>::value && std::is_same<Real, double>::value) {
+		double_vec_MatrInc(matra);
+        }
+        else if(std::is_same<RealB, float>::value && std::is_same<Real,float>::value) {
+		float_vec_MatrInc(matra);
+	}
+	else {
+        	for (int nel = 0; nel < rows * columns; ++nel)
+            		ElementN(nel) += (Real)matra.ElementN(nel);
+        }
+    }
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //           vec_MatrDec(const ChMatrix<double>& matra)                              		      //
+    /// Decrements this matrix with another matrix A, as: [this]-=[A]. But vectorized opeartions for speedup. //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    void double_vec_MatrDec(const ChMatrix<double>& matra) {
+	double *addr = GetAddress();
+        const double* a_addr = matra.GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%2;
+        int nel;
+        for(nel = 0; nel<rem_elem; nel += 2) {
+		__m128d elem_a = _mm_load_pd(a_addr+nel);
+                __m128d elem   = _mm_load_pd(addr + nel);
+		__m128d result = _mm_sub_pd(elem_a, elem);
+                _mm_store_pd(addr+nel, result);
+        }
+        if(rem_elem != tot_elem) {
+ 		ElementN(nel) -= (double)matra.ElementN(nel);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //           vec_MatrInc(const ChMatrix<float>&matra)                              			      //
+    /// Decrements this matrix with another matrix A, as: [this]+=[A]. But vectorized opeartions for speedup. //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    template <class RealB>
+    void float_vec_MatrDec(const ChMatrix<RealB>& matra) {
+	float *addr = (float*) GetAddress();
+        const float* a_addr = (const float*)matra.GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
+        int nel;
+        for(nel = 0; nel<rem_elem; nel += 2) {
+		__m128 elem_a = _mm_load_ps(a_addr+nel);
+                __m128 elem   = _mm_load_ps(addr + nel);
+		__m128 result = _mm_sub_ps(elem_a, elem);
+                _mm_store_ps(addr+nel, result);
+        }
+        if(rem_elem != tot_elem) {
+                for(nel=rem_elem; nel<tot_elem; nel++){
+	 		ElementN(nel) -= (float)matra.ElementN(nel);
+     		}
+        }
     }
 
     /// Decrements this matrix with another matrix A, as: [this]-=[A]
     template <class RealB>
     void MatrDec(const ChMatrix<RealB>& matra) {
         assert(matra.GetColumns() == columns && matra.GetRows() == rows);
-        for (int nel = 0; nel < rows * columns; ++nel)
-            ElementN(nel) -= (Real)matra.ElementN(nel);
+        if(std::is_same<RealB, double>::value && std::is_same<Real, double>::value) {
+            double_vec_MatrDec(matra);
+        }
+        else if(std::is_same<RealB, float>::value && std::is_same<Real, float>::value) {
+            float_vec_MatrDec(matra);
+  	}
+ 	else {
+        	for (int nel = 0; nel < rows * columns; ++nel)
+            	ElementN(nel) -= (Real)matra.ElementN(nel);
+ 	}
     }
 
+    ///////////////// DOUBLE_VEC_MATRSCALE() /////////////////////////////////
+    void vec_MatrScale(double factor) {
+        double *addr = GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%2;
+        int nel;
+        __m128d scale = _mm_set1_pd(factor);
+          for(nel=0; nel< rem_elem; nel+=2) {
+	    __m128d elem_a = _mm_load_pd(addr+nel);
+            __m128d result = _mm_mul_pd(elem_a, scale);
+            _mm_store_pd(addr+nel,result);
+        }
+          if(rem_elem != tot_elem)
+            ElementN(nel) *= factor;
+    }
+
+
+    //////////////// SINGLE_VEC_MATRSCALE()  /////////////////////////////////
+    
+    void vec_MatrScale(float factor) {
+        float *addr = GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem % 4;
+        int nel;
+        __m128 scale = _mm_set1_ps(factor);
+          for(nel=0; nel< rem_elem; nel+=4) {
+	    __m128 elem_a = _mm_load_ps(addr+nel);
+            __m128 result = _mm_mul_ps(elem_a, scale);
+            _mm_store_ps(addr+nel,result);
+        }
+          if(rem_elem != tot_elem){
+             for(nel=rem_elem; nel<tot_elem; nel++){
+            	ElementN(nel) *= factor;
+             }
+          }
+    }
     /// Scales a matrix, multiplying all elements by a constant value: [this]*=f
     void MatrScale(Real factor) {
-        for (int nel = 0; nel < rows * columns; ++nel)
-            ElementN(nel) *= factor;
+	if(std::is_same<Real, double>::value) {
+           vec_MatrScale(factor);
+        }
+        else if(std::is_same<Real, float>::value) {
+           vec_MatrScale(factor);
+        }
+        else {
+           for (int nel = 0; nel < rows * columns; ++nel)
+               ElementN(nel) *= factor;
+        }
     }
 
     /// Scales a matrix, multiplying all element by all oter elements of
     /// matra (it is not the classical matrix multiplication!)
+    //
+    
+
+    void vec_MatrScale(const ChMatrix<double>& matra) {
+        const double* a_addr = matra.GetAddress();
+        double * addr = GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%2;
+        int nel;
+        for(nel=0; nel < rem_elem; nel+=2) {
+           __m128d scale = _mm_load_pd(a_addr+nel);
+           __m128d matrix= _mm_load_pd(addr+nel);
+           __m128d res = _mm_mul_pd(scale,matrix);
+           _mm_store_pd(addr+nel, res);
+        }
+        if(rem_elem != tot_elem)
+           ElementN(nel) *= (Real)matra.ElementN(nel);
+    }
+
+    void vec_MatrScale(const ChMatrix<float>& matra) {
+        const float* a_addr = matra.GetAddress();
+        float * addr = GetAddress();
+        unsigned int tot_elem = rows*columns;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
+        int nel;
+        for(nel=0; nel < rem_elem; nel+=4) {
+           __m128 scale = _mm_load_ps(a_addr+nel);
+           __m128 matrix= _mm_load_ps(addr+nel);
+           __m128 res = _mm_mul_ps(scale,matrix);
+           _mm_store_ps(addr+nel, res);
+        }
+        if(nel != tot_elem-1)
+             for(nel=rem_elem; nel<tot_elem;nel++)
+                  ElementN(nel) *= (Real)matra.ElementN(nel);
+    }
+    
     template <class RealB>
     void MatrScale(const ChMatrix<RealB>& matra) {
         assert(matra.GetColumns() == columns && matra.GetRows() == rows);
-        for (int nel = 0; nel < rows * columns; ++nel)
-            ElementN(nel) *= (Real)matra.ElementN(nel);
+        if(std::is_same<RealB, double>::value) {
+             vec_MatrScale(matra);
+        }
+        else if(std::is_same<RealB, float>::value) {
+             vec_MatrScale(matra);
+        }
+        else {
+            for (int nel = 0; nel < rows * columns; ++nel)
+                ElementN(nel) *= (Real)matra.ElementN(nel);
+        }
     }
 
     /// Scales a matrix, dividing all elements by a constant value: [this]/=f
@@ -693,16 +893,45 @@ class ChMatrix {
             }
         }
     }
-
+    
+    template <class RealB, class RealC>
+    static Real double_vec_MatrDot(const ChMatrix<RealB>* ma, const ChMatrix<RealC>* mb){
+	double tot = 0;
+        const double* a_addr = (const double*) ma->GetAddress();
+        const double* b_addr = (const double*) mb->GetAddress();
+	int nel;
+	unsigned int tot_size= ma->GetRows() * ma->GetColumns();
+	unsigned int rem_size= tot_size - tot_size % 2;
+	double total = 0;
+	const int mask = 0x31;
+	double part_sum = 0;
+	for(nel=0; nel < rem_size ; nel += 2) {
+		__m128d a_elem = _mm_load_pd(a_addr+nel);	
+           	__m128d b_elem = _mm_load_pd(b_addr+nel);
+		__m128d result = _mm_dp_pd(a_elem, b_elem, mask);	
+		_mm_storeh_pd(&part_sum, result);
+           	total += part_sum;
+	}
+	if (rem_size != tot_size) {
+		total+= (double) (ma->ElementN(nel) * mb->ElementN(nel));
+	}
+	return total;
+    }
     /// Computes dot product between two column-matrices (vectors) with
     /// same size. Returns a scalar value.
     template <class RealB, class RealC>
     static Real MatrDot(const ChMatrix<RealB>* ma, const ChMatrix<RealC>* mb) {
         assert(ma->GetColumns() == mb->GetColumns() && ma->GetRows() == mb->GetRows());
         Real tot = 0;
-        for (int i = 0; i < ma->GetRows(); ++i)
-            tot += (Real)(ma->ElementN(i) * mb->ElementN(i));
-        return tot;
+	if(std::is_same<RealB, double>::value && std::is_same<RealC, double>::value && std::is_same<Real, double>::value) {
+		tot = double_vec_MatrDot(ma, mb);
+		return tot;
+	}
+        else {
+        	for (int i = 0; i < ma->GetRows(); ++i)
+            		tot += (Real)(ma->ElementN(i) * mb->ElementN(i));
+        	return tot;
+	}
     }
 
     /// Transpose this matrix in place
