@@ -893,7 +893,8 @@ class ChMatrix {
             }
         }
     }
-    
+////////////////////////////////// DOUBLE_VEC_MATRDOT() ///////////////////////////////////////////////
+//
     template <class RealB, class RealC>
     static Real double_vec_MatrDot(const ChMatrix<RealB>* ma, const ChMatrix<RealC>* mb){
 	double tot = 0;
@@ -909,11 +910,38 @@ class ChMatrix {
 		__m128d a_elem = _mm_load_pd(a_addr+nel);	
            	__m128d b_elem = _mm_load_pd(b_addr+nel);
 		__m128d result = _mm_dp_pd(a_elem, b_elem, mask);	
-		_mm_storeh_pd(&part_sum, result);
+		_mm_storel_pd(&part_sum, result);
            	total += part_sum;
 	}
 	if (rem_size != tot_size) {
 		total+= (double) (ma->ElementN(nel) * mb->ElementN(nel));
+	}
+	return total;
+    }
+
+
+////////////////////////////////////  FLOAT_VEC_MATRDOT() /////////////////////////////////////////////////
+    template <class RealB, class RealC>
+    static Real float_vec_MatrDot(const ChMatrix<RealB>* ma, const ChMatrix<RealC>* mb){
+        const float* a_addr = (const float*) ma->GetAddress();
+        const float* b_addr = (const float*) mb->GetAddress();
+	int nel;
+	unsigned int tot_size= ma->GetRows() * ma->GetColumns();
+	unsigned int rem_size= tot_size - tot_size % 4;
+	float total = 0;
+	const int mask = 0xF1;  //Perform DotProduct on all the 4 float values and store it in R3.
+	float part_sum = 0;
+	for(nel=0; nel < rem_size ; nel += 4) {
+		__m128 a_elem = _mm_load_ps(a_addr+nel);	
+           	__m128 b_elem = _mm_load_ps(b_addr+nel);
+		__m128 result = _mm_dp_ps(a_elem, b_elem, mask);	
+		_mm_store_ss(&part_sum, result);
+           	total += part_sum;
+	}
+	if (rem_size != tot_size) {
+		for(nel=rem_size; nel< tot_size; nel +=1) {
+			total+= (double) (ma->ElementN(nel) * mb->ElementN(nel));
+		}
 	}
 	return total;
     }
