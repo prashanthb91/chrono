@@ -17,6 +17,8 @@
 using namespace chrono;
 timespec m_start,m_stop;
 
+typedef float REAL;
+
 void measure_time(bool flag) {
         if(!TIME) {
 		return;
@@ -36,8 +38,8 @@ void measure_time(bool flag) {
 }
 void test_matrix_scale(){
 	PRINT std::cout<<"----Executing matrix scale operation----\n";
-     	chrono::ChMatrixDynamic<double> MatA(SIZE,SIZE);
-     	chrono::ChMatrixDynamic<double> Scale(SIZE,SIZE);
+     	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
+     	chrono::ChMatrixDynamic<REAL> Scale(SIZE,SIZE);
 
      	MatA.FillRandom(-10,10);
      	Scale.FillRandom(-1,1);
@@ -47,61 +49,57 @@ void test_matrix_scale(){
 }
 
 void test_matrix_increment(){
-    	chrono::ChMatrixDynamic<double> double_MatA(SIZE,SIZE); 
-    	chrono::ChMatrixDynamic<double> double_Incr(SIZE,SIZE);
-    	double_MatA.MatrInc(double_Incr);
-	double_MatA += double_Incr;
-	//Test for single
-	chrono::ChMatrixDynamic<float> single_MatA(SIZE,SIZE);
-	chrono::ChMatrixDynamic<float> single_Incr(SIZE,SIZE);
-	single_MatA.MatrInc(double_Incr);
-	single_MatA += double_Incr;
+    	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE); 
+    	chrono::ChMatrixDynamic<REAL> Incr(SIZE,SIZE);
+    	MatA.MatrInc(Incr);
+	MatA += Incr;
 }
 
 void test_matrix_dotproduct() {
 
-	ChMatrixDynamic<double> MatA(SIZE,SIZE);
-	ChMatrixDynamic<double> MatB(SIZE,SIZE);
+	ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
+	ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
 	
 	MatA.FillRandom(-10, 10);
 	MatB.FillRandom(-5, 5);
 
-	double dot_product;
+	REAL dot_product;
 
 	measure_time(T_START);
-	dot_product = ChMatrix<double>::MatrDot(&MatA, &MatB);
+	dot_product = ChMatrix<REAL>::MatrDot(&MatA, &MatB);
 	measure_time(T_STOP);
 
         PRINT	std::cout << "Dot product is :"<<dot_product<< "\n";
 
-	ChMatrixDynamic<float> MatC(SIZE,SIZE);
-	ChMatrixDynamic<float> MatD(SIZE,SIZE);
-	
-	MatC.FillRandom(-10,-10);
-	MatD.FillRandom(-9, 9);
-
-	float float_dp;
-	PRINT std::cout<<"---- floating point Dot product ----\n";
-	measure_time(T_START);
-	float_dp = ChMatrix<float>::MatrDot(&MatC, &MatD);
-	measure_time(T_STOP);
 
 }
 
 void test_matrix_sub() {
-     PRINT std::cout<< "Compiler, you are a big pain in the ass";
+	PRINT std::cout<< " ------ Executing Matrix Subtraction ------";
+	
+	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
+	chrono::ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
+
+	MatA.FillRandom(-10,10);
+	MatB.FillRandom(-8,8);
+
+	chrono::ChMatrixDynamic<REAL> MatC(SIZE, SIZE);
+
+	measure_time(T_START);
+	MatC = MatA - MatB;
+	measure_time(T_STOP);
 }   
                                  
 void test_matrix_add() {
     PRINT std::cout<< " ---- Executing Matrix Addition ----\n";
      
-    chrono::ChMatrixDynamic<double> MatA(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
     
-    chrono::ChMatrixDynamic<double> MatB(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
 
     
-    chrono::ChMatrixDynamic<double> MatC(SIZE,SIZE);
-    chrono::ChMatrixDynamic<double> MatD(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatC(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatD(SIZE,SIZE);
 
     MatA.FillRandom(-10,10);
     MatB.FillRandom(-5,5);
@@ -118,13 +116,13 @@ void test_matrix_add() {
 int main(int argc, char* argv[]) {
 
 
-    chrono::ChMatrixDynamic<double> MatA(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
     
-    chrono::ChMatrixDynamic<double> MatB(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
 
     
-    chrono::ChMatrixDynamic<double> MatC(SIZE,SIZE);
-    chrono::ChMatrixDynamic<double> MatD(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatC(SIZE,SIZE);
+    chrono::ChMatrixDynamic<REAL> MatD(SIZE,SIZE);
 
     MatA.FillRandom(-10, 10);
     MatB.FillRandom(-5,5);
@@ -163,7 +161,7 @@ int main(int argc, char* argv[]) {
 	    }
     case 99:{
 		test_matrix_add();
-		//test_matrix_sub();
+		test_matrix_sub();
 		test_matrix_scale();
 		test_matrix_dotproduct();
 	        break;
