@@ -8,6 +8,7 @@ SET(TESTS
     test_sharedptr
     #test_stream
     test_matrix
+    test_quaternion
 )
 
 MESSAGE(STATUS "Unit test programs for CORE module...")
