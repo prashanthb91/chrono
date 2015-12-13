@@ -237,6 +237,7 @@ int main(int argc, char* argv[]) {
 
     MySine2dM mfx2dM;
     ChMatrixNM<double, 2, 1> resultM;
+    GetLog() << "Getting Here";
     ChQuadrature::Integrate2D<ChMatrixNM<double, 2, 1> >(resultM, mfx2dM, 0, 1, 0, 3, 6);
     GetLog() << "Quadrature 2d matrix result:" << resultM << " (analytic solution: 2.25, 4.5) \n";
 

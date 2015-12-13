@@ -630,7 +630,7 @@ class ChMatrix {
         unsigned int tot_elem = rows*columns;
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 2) {
+        for(nel = 0; nel<rem_elem; nel += 4) {
 		__m128 elem_a = _mm_load_ps(a_addr+nel);
                 __m128 elem   = _mm_load_ps(addr + nel);
 		__m128 result = _mm_add_ps(elem_a, elem);
@@ -638,7 +638,7 @@ class ChMatrix {
         }
         if(rem_elem != tot_elem) {
                 for(nel=rem_elem; nel<tot_elem; nel++){
-	 		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+	 		ElementN(nel) += matra.ElementN(nel);
      		}
         }
     }
@@ -647,7 +647,7 @@ class ChMatrix {
     template <class RealB>
     void MatrInc(const ChMatrix<RealB>& matra) {
         assert(matra.GetColumns() == columns && matra.GetRows() == rows);
-	if(std::is_same<RealB, double>::value && std::is_same<Real, double>::value) {
+	if((std::is_same<RealB, double>::value && std::is_same<Real, double>::value) &&((size_t)GetAddress() & 0x0F == 0x00)) {
 		double_vec_MatrInc(matra);
         }
         else if(std::is_same<RealB, float>::value && std::is_same<Real,float>::value) {
@@ -692,7 +692,7 @@ class ChMatrix {
         unsigned int tot_elem = rows*columns;
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 2) {
+        for(nel = 0; nel<rem_elem; nel += 4) {
 		__m128 elem_a = _mm_load_ps(a_addr+nel);
                 __m128 elem   = _mm_load_ps(addr + nel);
 		__m128 result = _mm_sub_ps(elem_a, elem);
@@ -723,7 +723,7 @@ class ChMatrix {
 
     ///////////////// DOUBLE_VEC_MATRSCALE() /////////////////////////////////
     void vec_MatrScale(double factor) {
-        double *addr = GetAddress();
+        double *addr = (double*) GetAddress();
         unsigned int tot_elem = rows*columns;
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
@@ -741,7 +741,7 @@ class ChMatrix {
     //////////////// SINGLE_VEC_MATRSCALE()  /////////////////////////////////
     
     void vec_MatrScale(float factor) {
-        float *addr = GetAddress();
+        float *addr = (float* )GetAddress();
         unsigned int tot_elem = rows*columns;
         unsigned int rem_elem = tot_elem - tot_elem % 4;
         int nel;
@@ -759,7 +759,7 @@ class ChMatrix {
     }
     /// Scales a matrix, multiplying all elements by a constant value: [this]*=f
     void MatrScale(Real factor) {
-	if(std::is_same<Real, double>::value) {
+	if((std::is_same<Real, double>::value)&&((size_t)GetAddress() & 0x0F == 0x00)) {
            vec_MatrScale(factor);
         }
         else if(std::is_same<Real, float>::value) {
