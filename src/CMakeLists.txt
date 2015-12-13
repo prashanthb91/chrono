@@ -15,8 +15,8 @@ option(BUILD_ADDITIONAL_TESTS "Build additional test programs" OFF)
 # Collect compiler flags required to build the Chrono libraries
 #-----------------------------------------------------------------------------
 
-set(CH_C_FLAGS "")
-set(CH_CXX_FLAGS "")
+set(CH_C_FLAGS "-pg")
+set(CH_CXX_FLAGS "-pg")
 
 #-----------------------------------------------------------------------------
 # Enable C++11 support
