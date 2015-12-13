@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
 	    }
     case 99:{
 		test_matrix_add();
-		//test_matrix_sub();
+		test_matrix_sub();
 		test_matrix_scale();
 		test_matrix_dotproduct();
 	        break;
