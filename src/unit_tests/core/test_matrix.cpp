@@ -6,7 +6,7 @@
 #include "core/ChQuadrature.h"
 #include <time.h>
 
-#define SIZE 1000
+#define SIZE 2
 #define TIME 1
 #define T_START 1
 #define T_STOP 0
@@ -49,13 +49,18 @@ void test_matrix_scale(){
 }
 
 void test_matrix_increment(){
+   	PRINT std::cout<<" -------- Executing Matrix Increment --------- \n";
     	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE); 
     	chrono::ChMatrixDynamic<REAL> Incr(SIZE,SIZE);
+	measure_time(T_START);
     	MatA.MatrInc(Incr);
+	measure_time(T_STOP);
 	MatA += Incr;
 }
 
 void test_matrix_dotproduct() {
+
+	PRINT std::cout<<"--------- Executing Matrix DotProduct ---------\n";
 
 	ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
 	ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
@@ -69,13 +74,13 @@ void test_matrix_dotproduct() {
 	dot_product = ChMatrix<REAL>::MatrDot(&MatA, &MatB);
 	measure_time(T_STOP);
 
-        PRINT	std::cout << "Dot product is :"<<dot_product<< "\n";
+        //PRINT	std::cout << "Dot product is :"<<dot_product<< "\n";
 
 
 }
 
 void test_matrix_sub() {
-	PRINT std::cout<< " ------ Executing Matrix Subtraction ------";
+	PRINT std::cout<< " ------ Executing Matrix Subtraction ------\n";
 	
 	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
 	chrono::ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
@@ -86,7 +91,8 @@ void test_matrix_sub() {
 	chrono::ChMatrixDynamic<REAL> MatC(SIZE, SIZE);
 
 	measure_time(T_START);
-	MatC = MatA - MatB;
+//	MatC = MatA - MatB;
+	MatC.MatrSub(MatA, MatB);
 	measure_time(T_STOP);
 }   
                                  
@@ -99,7 +105,6 @@ void test_matrix_add() {
 
     
     chrono::ChMatrixDynamic<REAL> MatC(SIZE,SIZE);
-    chrono::ChMatrixDynamic<REAL> MatD(SIZE,SIZE);
 
     MatA.FillRandom(-10,10);
     MatB.FillRandom(-5,5);
@@ -107,9 +112,9 @@ void test_matrix_add() {
     int i=0;
     int count=0;
     measure_time(T_START);
-    MatC = MatA + MatB; 
+    //MatC = MatA + MatB; 
+    MatC.MatrAdd(MatA,MatB);
     measure_time(T_STOP);
-    MatD.MatrAdd(MatA,MatB); 
 
 }
 
@@ -161,9 +166,10 @@ int main(int argc, char* argv[]) {
 	    }
     case 99:{
 		test_matrix_add();
-		//test_matrix_sub();
+		test_matrix_sub();
 		test_matrix_scale();
 		test_matrix_dotproduct();
+		test_matrix_increment();
 	        break;
 	    }
     
