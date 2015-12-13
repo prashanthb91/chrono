@@ -261,13 +261,13 @@ class ChQuaternion {
        {
          __m128d v1 = _mm_set_pd(ne0,ne1);
          __m128d v2 = _mm_set_pd(ne2,ne3);
-         _mm_store_pd((double*)&e0, v1);
-         _mm_store_pd((double*)&e2, v2);
+         _mm_storeu_pd((double*)&e0, v1);
+         _mm_storeu_pd((double*)&e2, v2);
        }         
        else if(std::is_same<Real,float>::value)
        {
          __m128 v = _mm_set_ps(ne0,ne1,ne2,ne3);
-         _mm_store_ps((float*)&e0, v);
+         _mm_storeu_ps((float*)&e0, v);
        }         
        else {
         e0 = ne0;
@@ -291,13 +291,13 @@ class ChQuaternion {
        {
          __m128d v1 = _mm_set_pd(p,p);
          __m128d v2 = _mm_set_pd(p,p);
-         _mm_store_pd((double*)&e0, v1);
-         _mm_store_pd((double*)&e2, v2);
+         _mm_storeu_pd((double*)&e0, v1);
+         _mm_storeu_pd((double*)&e2, v2);
        }         
        else if(std::is_same<Real,float>::value)
        {
          __m128 v = _mm_set_ps(p,p,p,p);
-         _mm_store_ps((float*)&e0, v);
+         _mm_storeu_ps((float*)&e0, v);
        }         
        else {
         e0 = p;
@@ -343,21 +343,21 @@ class ChQuaternion {
     void Add(const ChQuaternion<Real> A, const ChQuaternion<Real> B) {
        if(std::is_same<Real,double>::value)
        {
-         __m128d a1 = _mm_load_pd((double*)&A.e0);
-         __m128d a2 = _mm_load_pd((double*)&A.e2);
-         __m128d b1 = _mm_load_pd((double*)&B.e0);
-         __m128d b2 = _mm_load_pd((double*)&B.e2);
+         __m128d a1 = _mm_loadu_pd((double*)&A.e0);
+         __m128d a2 = _mm_loadu_pd((double*)&A.e2);
+         __m128d b1 = _mm_loadu_pd((double*)&B.e0);
+         __m128d b2 = _mm_loadu_pd((double*)&B.e2);
          __m128d res1 = _mm_add_pd(a1,b1);
          __m128d res2 = _mm_add_pd(a2,b2);
-         _mm_store_pd((double*)&e0, res1);
-         _mm_store_pd((double*)&e2, res2);
+         _mm_storeu_pd((double*)&e0, res1);
+         _mm_storeu_pd((double*)&e2, res2);
        }         
        else if(std::is_same<Real,float>::value)
        {
-         __m128 a = _mm_load_ps((float*)&A.e0);
-         __m128 b = _mm_load_ps((float*)&B.e0);
+         __m128 a = _mm_loadu_ps((float*)&A.e0);
+         __m128 b = _mm_loadu_ps((float*)&B.e0);
          __m128 res1 = _mm_add_ps(a,b);
-         _mm_store_ps((float*)&e0, res1);
+         _mm_storeu_ps((float*)&e0, res1);
        }         
        else {
         e0 = A.e0 + B.e0;
@@ -372,21 +372,21 @@ class ChQuaternion {
     void Sub(const ChQuaternion<Real> A, const ChQuaternion<Real> B) {
        if(std::is_same<Real,double>::value)
        {
-         __m128d a1 = _mm_load_pd((double*)&A.e0);
-         __m128d a2 = _mm_load_pd((double*)&A.e2);
-         __m128d b1 = _mm_load_pd((double*)&B.e0);
-         __m128d b2 = _mm_load_pd((double*)&B.e2);
+         __m128d a1 = _mm_loadu_pd((double*)&A.e0);
+         __m128d a2 = _mm_loadu_pd((double*)&A.e2);
+         __m128d b1 = _mm_loadu_pd((double*)&B.e0);
+         __m128d b2 = _mm_loadu_pd((double*)&B.e2);
          __m128d res1 = _mm_sub_pd(a1,b1);
          __m128d res2 = _mm_sub_pd(a2,b2);
-         _mm_store_pd((double*)&e0, res1);
-         _mm_store_pd((double*)&e2, res2);
+         _mm_storeu_pd((double*)&e0, res1);
+         _mm_storeu_pd((double*)&e2, res2);
        }         
        else if(std::is_same<Real,float>::value)
        {
-         __m128 a = _mm_load_ps((float*)&A.e0);
-         __m128 b = _mm_load_ps((float*)&B.e0);
+         __m128 a = _mm_loadu_ps((float*)&A.e0);
+         __m128 b = _mm_loadu_ps((float*)&B.e0);
          __m128 res1 = _mm_sub_ps(a,b);
-         _mm_store_ps((float*)&e0, res1);
+         _mm_storeu_ps((float*)&e0, res1);
        }         
        else {
         e0 = A.e0 - B.e0;
@@ -417,21 +417,21 @@ class ChQuaternion {
     void Mul(const ChQuaternion<Real> A, const Real v) {
        if(std::is_same<Real,double>::value)
        {
-         __m128d a1 = _mm_load_pd((double*)&A.e0);
-         __m128d a2 = _mm_load_pd((double*)&A.e2);
+         __m128d a1 = _mm_loadu_pd((double*)&A.e0);
+         __m128d a2 = _mm_loadu_pd((double*)&A.e2);
          __m128d v1 = _mm_set_pd(v,v);
          __m128d v2 = _mm_set_pd(v,v);
          __m128d res1 = _mm_mul_pd(a1,v1);
          __m128d res2 = _mm_mul_pd(a2,v2);
-         _mm_store_pd((double*)&e0, res1);
-         _mm_store_pd((double*)&e2, res2);
+         _mm_storeu_pd((double*)&e0, res1);
+         _mm_storeu_pd((double*)&e2, res2);
        }         
        else if(std::is_same<Real,float>::value)
        {
-         __m128 a = _mm_load_ps((float*)&A.e0);
+         __m128 a = _mm_loadu_ps((float*)&A.e0);
          __m128 v1 = _mm_set_ps(v,v,v,v);
          __m128 res1 = _mm_mul_ps(a,v1);
-         _mm_store_ps((float*)&e0, res1);
+         _mm_storeu_ps((float*)&e0, res1);
        }         
        else {
         e0 = A.e0 * v;
@@ -446,21 +446,21 @@ class ChQuaternion {
     void Scale(const Real v) {
        if(std::is_same<Real,double>::value)
        {
-         __m128d a1 = _mm_load_pd((double*)&e0);
-         __m128d a2 = _mm_load_pd((double*)&e2);
+         __m128d a1 = _mm_loadu_pd((double*)&e0);
+         __m128d a2 = _mm_loadu_pd((double*)&e2);
          __m128d v1 = _mm_set_pd(v,v);
          __m128d v2 = _mm_set_pd(v,v);
          __m128d res1 = _mm_mul_pd(a1,v1);
          __m128d res2 = _mm_mul_pd(a2,v2);
-         _mm_store_pd((double*)&e0, res1);
-         _mm_store_pd((double*)&e2, res2);
+         _mm_storeu_pd((double*)&e0, res1);
+         _mm_storeu_pd((double*)&e2, res2);
        }         
        else if(std::is_same<Real,float>::value)
        {
-         __m128 a = _mm_load_ps((float*)&e0);
+         __m128 a = _mm_loadu_ps((float*)&e0);
          __m128 v1 = _mm_set_ps(v,v,v,v);
          __m128 res1 = _mm_mul_ps(a,v1);
-         _mm_store_ps((float*)&e0, res1);
+         _mm_storeu_ps((float*)&e0, res1);
        }         
        else {
         e0 *= v;

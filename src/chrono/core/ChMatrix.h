@@ -491,10 +491,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for (nel = 0; nel < rem_elem; nel +=2){
-            __m128d elem_a = _mm_load_pd(a_addr + nel);
-            __m128d elem_b = _mm_load_pd(b_addr + nel);
+            __m128d elem_a = _mm_loadu_pd(a_addr + nel);
+            __m128d elem_b = _mm_loadu_pd(b_addr + nel);
             __m128d res = _mm_add_pd(elem_a, elem_b);
-            _mm_store_pd(addr+nel,res);
+            _mm_storeu_pd(addr+nel,res);
         }
         if(rem_elem != tot_elem)
             ElementN(nel) = (Real)(matra.ElementN(nel) + matrb.ElementN(nel));
@@ -510,10 +510,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for (int nel = 0; nel < rem_elem; nel +=4){
-            __m128 elem_a = _mm_load_ps(a_addr + nel);
-            __m128 elem_b = _mm_load_ps(b_addr + nel);
+            __m128 elem_a = _mm_loadu_ps(a_addr + nel);
+            __m128 elem_b = _mm_loadu_ps(b_addr + nel);
             __m128 res = _mm_add_ps(elem_a, elem_b);
-            _mm_store_ps(addr + nel,res);
+            _mm_storeu_ps(addr + nel,res);
         }
         while(nel < tot_elem)
         {
@@ -548,10 +548,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for (nel = 0; nel < rem_elem; nel +=2){
-            __m128d elem_a = _mm_load_pd(a_addr + nel);
-            __m128d elem_b = _mm_load_pd(b_addr + nel);
+            __m128d elem_a = _mm_loadu_pd(a_addr + nel);
+            __m128d elem_b = _mm_loadu_pd(b_addr + nel);
             __m128d res = _mm_sub_pd(elem_a, elem_b);
-            _mm_store_pd(addr+nel,res);
+            _mm_storeu_pd(addr+nel,res);
         }
         if(rem_elem != tot_elem)
             ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
@@ -567,10 +567,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for (int nel = 0; nel < rem_elem; nel +=4){
-            __m128 elem_a = _mm_load_ps(a_addr + nel);
-            __m128 elem_b = _mm_load_ps(b_addr + nel);
+            __m128 elem_a = _mm_loadu_ps(a_addr + nel);
+            __m128 elem_b = _mm_loadu_ps(b_addr + nel);
             __m128 res = _mm_sub_ps(elem_a, elem_b);
-            _mm_store_ps(addr + nel,res);
+            _mm_storeu_ps(addr + nel,res);
         }
         while(nel < tot_elem)
         {
@@ -607,10 +607,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_load_pd(a_addr+nel);
-                __m128d elem   = _mm_load_pd(addr + nel);
+		__m128d elem_a = _mm_loadu_pd(a_addr+nel);
+                __m128d elem   = _mm_loadu_pd(addr + nel);
 		__m128d result = _mm_add_pd(elem_a, elem);
-                _mm_store_pd(addr+nel, result);
+                _mm_storeu_pd(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
  		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
@@ -631,10 +631,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128 elem_a = _mm_load_ps(a_addr+nel);
-                __m128 elem   = _mm_load_ps(addr + nel);
+		__m128 elem_a = _mm_loadu_ps(a_addr+nel);
+                __m128 elem   = _mm_loadu_ps(addr + nel);
 		__m128 result = _mm_add_ps(elem_a, elem);
-                _mm_store_ps(addr+nel, result);
+                _mm_storeu_ps(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
                 for(nel=rem_elem; nel<tot_elem; nel++){
@@ -670,10 +670,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_load_pd(a_addr+nel);
-                __m128d elem   = _mm_load_pd(addr + nel);
+		__m128d elem_a = _mm_loadu_pd(a_addr+nel);
+                __m128d elem   = _mm_loadu_pd(addr + nel);
 		__m128d result = _mm_sub_pd(elem_a, elem);
-                _mm_store_pd(addr+nel, result);
+                _mm_storeu_pd(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
  		ElementN(nel) -= (double)matra.ElementN(nel);
@@ -693,10 +693,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128 elem_a = _mm_load_ps(a_addr+nel);
-                __m128 elem   = _mm_load_ps(addr + nel);
+		__m128 elem_a = _mm_loadu_ps(a_addr+nel);
+                __m128 elem   = _mm_loadu_ps(addr + nel);
 		__m128 result = _mm_sub_ps(elem_a, elem);
-                _mm_store_ps(addr+nel, result);
+                _mm_storeu_ps(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
                 for(nel=rem_elem; nel<tot_elem; nel++){
@@ -729,9 +729,9 @@ class ChMatrix {
         int nel;
         __m128d scale = _mm_set1_pd(factor);
           for(nel=0; nel< rem_elem; nel+=2) {
-	    __m128d elem_a = _mm_load_pd(addr+nel);
+	    __m128d elem_a = _mm_loadu_pd(addr+nel);
             __m128d result = _mm_mul_pd(elem_a, scale);
-            _mm_store_pd(addr+nel,result);
+            _mm_storeu_pd(addr+nel,result);
         }
           if(rem_elem != tot_elem)
             ElementN(nel) *= factor;
@@ -747,9 +747,9 @@ class ChMatrix {
         int nel;
         __m128 scale = _mm_set1_ps(factor);
           for(nel=0; nel< rem_elem; nel+=4) {
-	    __m128 elem_a = _mm_load_ps(addr+nel);
+	    __m128 elem_a = _mm_loadu_ps(addr+nel);
             __m128 result = _mm_mul_ps(elem_a, scale);
-            _mm_store_ps(addr+nel,result);
+            _mm_storeu_ps(addr+nel,result);
         }
           if(rem_elem != tot_elem){
              for(nel=rem_elem; nel<tot_elem; nel++){
@@ -783,10 +783,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for(nel=0; nel < rem_elem; nel+=2) {
-           __m128d scale = _mm_load_pd(a_addr+nel);
-           __m128d matrix= _mm_load_pd(addr+nel);
+           __m128d scale = _mm_loadu_pd(a_addr+nel);
+           __m128d matrix= _mm_loadu_pd(addr+nel);
            __m128d res = _mm_mul_pd(scale,matrix);
-           _mm_store_pd(addr+nel, res);
+           _mm_storeu_pd(addr+nel, res);
         }
         if(rem_elem != tot_elem)
            ElementN(nel) *= (Real)matra.ElementN(nel);
@@ -799,10 +799,10 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for(nel=0; nel < rem_elem; nel+=4) {
-           __m128 scale = _mm_load_ps(a_addr+nel);
-           __m128 matrix= _mm_load_ps(addr+nel);
+           __m128 scale = _mm_loadu_ps(a_addr+nel);
+           __m128 matrix= _mm_loadu_ps(addr+nel);
            __m128 res = _mm_mul_ps(scale,matrix);
-           _mm_store_ps(addr+nel, res);
+           _mm_storeu_ps(addr+nel, res);
         }
         if(nel != tot_elem-1)
              for(nel=rem_elem; nel<tot_elem;nel++)
@@ -909,8 +909,8 @@ class ChMatrix {
 	const int mask = 0x31;
 	double part_sum = 0;
 	for(nel=0; nel < rem_size ; nel += 2) {
-		__m128d a_elem = _mm_load_pd(a_addr+nel);	
-           	__m128d b_elem = _mm_load_pd(b_addr+nel);
+		__m128d a_elem = _mm_loadu_pd(a_addr+nel);	
+           	__m128d b_elem = _mm_loadu_pd(b_addr+nel);
 		__m128d result = _mm_dp_pd(a_elem, b_elem, mask);	
 		_mm_storel_pd(&part_sum, result);
            	total += part_sum;
@@ -934,8 +934,8 @@ class ChMatrix {
 	const int mask = 0xF1;  //Perform DotProduct on all the 4 float values and store it in R3.
 	float part_sum = 0;
 	for(nel=0; nel < rem_size ; nel += 4) {
-		__m128 a_elem = _mm_load_ps(a_addr+nel);	
-           	__m128 b_elem = _mm_load_ps(b_addr+nel);
+		__m128 a_elem = _mm_loadu_ps(a_addr+nel);	
+           	__m128 b_elem = _mm_loadu_ps(b_addr+nel);
 		__m128 result = _mm_dp_ps(a_elem, b_elem, mask);	
 		_mm_store_ss(&part_sum, result);
            	total += part_sum;
