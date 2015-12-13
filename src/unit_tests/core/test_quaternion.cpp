@@ -12,7 +12,7 @@
 #define T_STOP 0
 #define COMMENT 1 
 #define PRINT if(COMMENT)
-typedef double Real;
+typedef float Real;
 
 
 using namespace chrono;

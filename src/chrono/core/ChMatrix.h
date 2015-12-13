@@ -538,10 +538,11 @@ class ChMatrix {
     }
 
     /// Subtract two matrices, and stores the result in "this" matrix: [this]=[A]-[B].
-    void double_vec_MatrSub(const ChMatrix<double>& matra, const ChMatrix<double>& matrb) {
-        const double *a_addr = matra.GetAddress();
-        const double *b_addr = matrb.GetAddress();
-        double* addr = GetAddress();
+    template <class RealB, class RealC>
+    void double_vec_MatrSub(const ChMatrix<RealB>& matra, const ChMatrix<RealC>& matrb) {
+        const double *a_addr =(const double*) matra.GetAddress();
+        const double *b_addr = (const double*)matrb.GetAddress();
+        double* addr = (double*)GetAddress();
         unsigned int tot_elem = rows*columns; 
         //For matrices of length which are not a multiple of 2
         unsigned int rem_elem = tot_elem - tot_elem%2;
