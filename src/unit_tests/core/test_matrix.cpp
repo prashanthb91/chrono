@@ -75,7 +75,19 @@ void test_matrix_dotproduct() {
 }
 
 void test_matrix_sub() {
-     PRINT std::cout<< "Compiler, you are a big pain in the ass";
+	PRINT std::cout<< " ------ Executing Matrix Subtraction ------";
+	
+	chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE);
+	chrono::ChMatrixDynamic<REAL> MatB(SIZE,SIZE);
+
+	MatA.FillRandom(-10,10);
+	MatB.FillRandom(-8,8);
+
+	chrono::ChMatrixDynamic<REAL> MatC(SIZE, SIZE);
+
+	measure_time(T_START);
+	MatC = MatA - MatB;
+	measure_time(T_STOP);
 }   
                                  
 void test_matrix_add() {
