@@ -63,6 +63,33 @@ void test_quaternion_scale(){
     measure_time(T_STOP);
 }
 
+void test_quaternion_set(){
+    PRINT std::cout<<"----Executing quaternion set operation----\n";
+    Real a = 3542.542352;
+    Real scale1 = 3.434;
+    Real scale2 = 2.235;
+    Real b = (Real)rand();
+    srand((unsigned)time(NULL));
+    Real c = (Real)rand();
+    Real d = (Real)rand();
+    chrono::ChQuaternion<Real> A(a,b,c,d);
+    chrono::ChQuaternion<Real> B(b,a,d,c);
+    chrono::ChQuaternion<Real> C;
+     
+    int i=0;
+    int count=0;
+    measure_time(T_START);
+    A.Set(scale1); 
+    for(i=0; i < 1000; i++)
+    {
+      if(i%3 ==0)
+         B.Set(scale2);
+      else
+         A.Set(1);
+    }
+    B.Set(scale1);
+    measure_time(T_STOP);
+}
 
 
 void test_quaternion_sub() {
@@ -156,6 +183,7 @@ int main(int argc, char* argv[]) {
 		test_quaternion_add();
 		test_quaternion_sub();
 		test_quaternion_scale();
+		test_quaternion_set();
 	        break;
 	    }
     
