@@ -17,7 +17,7 @@
 using namespace chrono;
 timespec m_start,m_stop;
 
-typedef float REAL;
+typedef double REAL;
 
 void measure_time(bool flag) {
         if(!TIME) {
@@ -55,9 +55,16 @@ void test_matrix_increment(){
 	measure_time(T_START);
     	MatA.MatrInc(Incr);
 	measure_time(T_STOP);
-	MatA += Incr;
 }
+void test_matrix_decrement(){
+    PRINT std::cout<< " --------- Executing Matrix Decrement --------- \n";
 
+    chrono::ChMatrixDynamic<REAL> MatA(SIZE,SIZE); 
+    chrono::ChMatrixDynamic<REAL> Incr(SIZE,SIZE);
+	measure_time(T_START);
+    MatA.MatrDec(Incr);
+	measure_time(T_STOP);
+}
 void test_matrix_dotproduct() {
 
 	PRINT std::cout<<"--------- Executing Matrix DotProduct ---------\n";
@@ -71,7 +78,7 @@ void test_matrix_dotproduct() {
 	REAL dot_product;
 
 	measure_time(T_START);
-	dot_product = ChMatrix<REAL>::MatrDot(&MatA, &MatB);
+	dot_product = ChMatrix<>::MatrDot(&MatA, &MatB);
 	measure_time(T_STOP);
 
         //PRINT	std::cout << "Dot product is :"<<dot_product<< "\n";
@@ -91,7 +98,7 @@ void test_matrix_sub() {
 	chrono::ChMatrixDynamic<REAL> MatC(SIZE, SIZE);
 
 	measure_time(T_START);
-	MatC = MatA - MatB;
+	MatC.MatrSub(MatA, MatB);
 	measure_time(T_STOP);
 }   
                                  
@@ -112,9 +119,8 @@ void test_matrix_add() {
     int i=0;
     int count=0;
     measure_time(T_START);
-    MatC = MatA + MatB; 
+    MatC.MatrAdd(MatA, MatB);
     measure_time(T_STOP);
-    MatD.MatrAdd(MatA,MatB); 
 
 }
 
@@ -170,6 +176,7 @@ int main(int argc, char* argv[]) {
 		test_matrix_scale();
 		test_matrix_dotproduct();
 		test_matrix_increment();
+        test_matrix_decrement();
 	        break;
 	    }
     
