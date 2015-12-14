@@ -52,7 +52,7 @@ void test_quaternion_scale(){
     int count=0;
     measure_time(T_START);
     A.Scale(scale1); 
-    for(i=0; i < 100; i++)
+    for(i=0; i < 1000; i++)
     {
       if(i%3 ==0)
          B.Scale(scale2);
@@ -80,7 +80,7 @@ void test_quaternion_sub() {
     int count=0;
     measure_time(T_START);
     C.Sub(A,B); 
-    for(i=0; i < 100; i++)
+    for(i=0; i < 1000; i++)
     {
       if(i%3 ==0)
          A.Sub(C,B);
@@ -105,13 +105,14 @@ void test_quaternion_add() {
     int count=0;
     measure_time(T_START);
     C.Add(A,B); 
-    for(i=0; i < 100; i++)
+    for(i=0; i < 1000; i++)
     {
       if(i%3 ==0)
          A.Add(C,B);
       else
          B.Add(C,A);
     }
+    C.Add(A,B); 
     measure_time(T_STOP);
 
 }
