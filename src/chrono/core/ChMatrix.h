@@ -509,7 +509,7 @@ class ChMatrix {
         //For matrices of length which are not a multiple of 4
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for (int nel = 0; nel < rem_elem; nel +=4){
+        for (nel = 0; nel < rem_elem; nel +=4){
             __m128 elem_a = _mm_loadu_ps(a_addr + nel);
             __m128 elem_b = _mm_loadu_ps(b_addr + nel);
             __m128 res = _mm_add_ps(elem_a, elem_b);
@@ -566,7 +566,7 @@ class ChMatrix {
         //For matrices of length which are not a multiple of 4
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for (int nel = 0; nel < rem_elem; nel +=4){
+        for (nel = 0; nel < rem_elem; nel +=4){
             __m128 elem_a = _mm_loadu_ps(a_addr + nel);
             __m128 elem_b = _mm_loadu_ps(b_addr + nel);
             __m128 res = _mm_sub_ps(elem_a, elem_b);
@@ -607,13 +607,13 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_loadu_pd(a_addr+nel);
+		        __m128d elem_a = _mm_loadu_pd(a_addr+nel);
                 __m128d elem   = _mm_loadu_pd(addr + nel);
-		__m128d result = _mm_add_pd(elem_a, elem);
+		        __m128d result = _mm_add_pd(elem_a, elem);
                 _mm_storeu_pd(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
- 		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+ 		    ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
         }
     }
 
@@ -631,9 +631,9 @@ class ChMatrix {
         unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 4) {
-		__m128 elem_a = _mm_load_ps(a_addr+nel);
+		        __m128 elem_a = _mm_load_ps(a_addr+nel);
                 __m128 elem   = _mm_load_ps(addr + nel);
-		__m128 result = _mm_add_ps(elem_a, elem);
+		        __m128 result = _mm_add_ps(elem_a, elem);
                 _mm_storeu_ps(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
@@ -647,13 +647,13 @@ class ChMatrix {
     template <class RealB>
     void MatrInc(const ChMatrix<RealB>& matra) {
         assert(matra.GetColumns() == columns && matra.GetRows() == rows);
-	if((std::is_same<RealB, double>::value && std::is_same<Real, double>::value) &&((size_t)GetAddress() & 0x0F == 0x00)) {
-		double_vec_MatrInc(matra);
+	    if((std::is_same<RealB, double>::value && std::is_same<Real, double>::value)) {
+		    double_vec_MatrInc(matra);
         }
         else if(std::is_same<RealB, float>::value && std::is_same<Real,float>::value) {
-		float_vec_MatrInc(matra);
-	}
-	else {
+		    float_vec_MatrInc(matra);
+	    }
+	    else {
         	for (int nel = 0; nel < rows * columns; ++nel)
             		ElementN(nel) += (Real)matra.ElementN(nel);
         }
@@ -663,20 +663,21 @@ class ChMatrix {
     /// Decrements this matrix with another matrix A, as: [this]-=[A]. But vectorized opeartions for speedup. //
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    void double_vec_MatrDec(const ChMatrix<double>& matra) {
-	double *addr = GetAddress();
-        const double* a_addr = matra.GetAddress();
+    template <class RealB>
+    void double_vec_MatrDec(const ChMatrix<RealB>& matra) {
+	    double *addr = (double*) GetAddress();
+        const double* a_addr = (const double*) matra.GetAddress();
         unsigned int tot_elem = rows*columns;
         unsigned int rem_elem = tot_elem - tot_elem%2;
         int nel;
         for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_loadu_pd(a_addr+nel);
+		        __m128d elem_a = _mm_loadu_pd(a_addr+nel);
                 __m128d elem   = _mm_loadu_pd(addr + nel);
-		__m128d result = _mm_sub_pd(elem_a, elem);
+		        __m128d result = _mm_sub_pd(elem_a, elem);
                 _mm_storeu_pd(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
- 		ElementN(nel) -= (double)matra.ElementN(nel);
+ 		        ElementN(nel) -= (double)matra.ElementN(nel);
         }
     }
 
