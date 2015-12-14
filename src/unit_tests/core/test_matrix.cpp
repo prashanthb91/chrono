@@ -6,7 +6,7 @@
 #include "core/ChQuadrature.h"
 #include <time.h>
 
-#define SIZE 2
+#define SIZE 1000
 #define TIME 1
 #define T_START 1
 #define T_STOP 0

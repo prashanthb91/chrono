@@ -33,6 +33,8 @@
 #include <emmintrin.h>
 #include <mmintrin.h>
 #include <smmintrin.h>
+#include <immintrin.h>
+
 namespace chrono {
 
 //
@@ -488,16 +490,19 @@ class ChMatrix {
         double* addr = (double*) GetAddress();
         unsigned int tot_elem = rows*columns; 
         //For matrices of length which are not a multiple of 2
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for (nel = 0; nel < rem_elem; nel +=2){
-            __m128d elem_a = _mm_load_pd(a_addr + nel);
-            __m128d elem_b = _mm_load_pd(b_addr + nel);
-            __m128d res = _mm_add_pd(elem_a, elem_b);
-            _mm_store_pd(addr+nel,res);
+        for (nel = 0; nel < rem_elem; nel +=4){
+            __m256d elem_a = _mm256_loadu_pd(a_addr + nel);
+            __m256d elem_b = _mm256_loadu_pd(b_addr + nel);
+            __m256d res = _mm256_add_pd(elem_a, elem_b);
+            _mm256_storeu_pd(addr+nel,res);
         }
-        if(rem_elem != tot_elem)
+        while(nel < tot_elem){
+            
             ElementN(nel) = (Real)(matra.ElementN(nel) + matrb.ElementN(nel));
+            nel++;
+        }
             
     }
     template <class RealB, class RealC>
@@ -507,13 +512,13 @@ class ChMatrix {
         float* addr = (float*)GetAddress();
         unsigned int tot_elem = rows*columns; 
         //For matrices of length which are not a multiple of 4
-        unsigned int rem_elem = tot_elem - tot_elem%4;
+        unsigned int rem_elem = tot_elem - tot_elem%8;
         int nel;
-        for (int nel = 0; nel < rem_elem; nel +=4){
-            __m128 elem_a = _mm_load_ps(a_addr + nel);
-            __m128 elem_b = _mm_load_ps(b_addr + nel);
-            __m128 res = _mm_add_ps(elem_a, elem_b);
-            _mm_store_ps(addr + nel,res);
+        for (int nel = 0; nel < rem_elem; nel +=8){
+            __m256 elem_a = _mm256_loadu_ps(a_addr + nel);
+            __m256 elem_b = _mm256_loadu_ps(b_addr + nel);
+            __m256 res = _mm256_add_ps(elem_a, elem_b);
+            _mm256_storeu_ps(addr + nel,res);
         }
         while(nel < tot_elem)
         {
@@ -545,13 +550,13 @@ class ChMatrix {
         double* addr = (double*)GetAddress();
         unsigned int tot_elem = rows*columns; 
         //For matrices of length which are not a multiple of 2
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for (nel = 0; nel < rem_elem; nel +=2){
-            __m128d elem_a = _mm_load_pd(a_addr + nel);
-            __m128d elem_b = _mm_load_pd(b_addr + nel);
-            __m128d res = _mm_sub_pd(elem_a, elem_b);
-            _mm_store_pd(addr+nel,res);
+        for (nel = 0; nel < rem_elem; nel +=4){
+            __m256d elem_a = _mm256_loadu_pd(a_addr + nel);
+            __m256d elem_b = _mm256_loadu_pd(b_addr + nel);
+            __m256d res = _mm256_sub_pd(elem_a, elem_b);
+            _mm256_storeu_pd(addr+nel,res);
         }
         if(rem_elem != tot_elem)
             ElementN(nel) = (Real)(matra.ElementN(nel) - matrb.ElementN(nel));
@@ -564,13 +569,13 @@ class ChMatrix {
         float* addr = (float*)GetAddress();
         unsigned int tot_elem = rows*columns; 
         //For matrices of length which are not a multiple of 4
-        unsigned int rem_elem = tot_elem - tot_elem%4;
+        unsigned int rem_elem = tot_elem - tot_elem%8;
         int nel;
-        for (int nel = 0; nel < rem_elem; nel +=4){
-            __m128 elem_a = _mm_load_ps(a_addr + nel);
-            __m128 elem_b = _mm_load_ps(b_addr + nel);
-            __m128 res = _mm_sub_ps(elem_a, elem_b);
-            _mm_store_ps(addr + nel,res);
+        for (int nel = 0; nel < rem_elem; nel +=8){
+            __m256 elem_a = _mm256_loadu_ps(a_addr + nel);
+            __m256 elem_b = _mm256_loadu_ps(b_addr + nel);
+            __m256 res = _mm256_sub_ps(elem_a, elem_b);
+            _mm256_storeu_ps(addr + nel,res);
         }
         while(nel < tot_elem)
         {
@@ -604,16 +609,17 @@ class ChMatrix {
 	double *addr = (double*)GetAddress();
         const double* a_addr = (const double*) matra.GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_load_pd(a_addr+nel);
-                __m128d elem   = _mm_load_pd(addr + nel);
-		__m128d result = _mm_add_pd(elem_a, elem);
-                _mm_store_pd(addr+nel, result);
+        for(nel = 0; nel<rem_elem; nel += 4) {
+		    __m256d elem_a = _mm256_loadu_pd(a_addr+nel);
+            __m256d elem   = _mm256_loadu_pd(addr + nel);
+		    __m256d result = _mm256_add_pd(elem_a, elem);
+            _mm256_storeu_pd(addr+nel, result);
         }
-        if(rem_elem != tot_elem) {
- 		ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+        while(nel < tot_elem) {
+ 		    ElementN(nel) =ElementN(nel) + matra.ElementN(nel);
+            nel++;
         }
     }
 
@@ -628,17 +634,17 @@ class ChMatrix {
 	float *addr = (float *)GetAddress();
         const float* a_addr = (const float*)matra.GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%4;
+        unsigned int rem_elem = tot_elem - tot_elem%8;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 4) {
-		__m128 elem_a = _mm_load_ps(a_addr+nel);
-                __m128 elem   = _mm_load_ps(addr + nel);
-		__m128 result = _mm_add_ps(elem_a, elem);
-                _mm_store_ps(addr+nel, result);
+        for(nel = 0; nel<rem_elem; nel += 8) {
+    		__m256 elem_a = _mm256_loadu_ps(a_addr+nel);
+            __m256 elem   = _mm256_loadu_ps(addr + nel);
+	    	__m256 result = _mm256_add_ps(elem_a, elem);
+            _mm256_storeu_ps(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
-                for(nel=rem_elem; nel<tot_elem; nel++){
-	 		ElementN(nel) += matra.ElementN(nel);
+            for(nel=rem_elem; nel<tot_elem; nel++){
+	 	    	ElementN(nel) += matra.ElementN(nel);
      		}
         }
     }
@@ -667,16 +673,17 @@ class ChMatrix {
 	double *addr = GetAddress();
         const double* a_addr = matra.GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem % 4;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 2) {
-		__m128d elem_a = _mm_load_pd(a_addr+nel);
-                __m128d elem   = _mm_load_pd(addr + nel);
-		__m128d result = _mm_sub_pd(elem_a, elem);
-                _mm_store_pd(addr+nel, result);
+        for(nel = 0; nel<rem_elem; nel += 4) {
+		    __m256d elem_a = _mm256_loadu_pd(a_addr+nel);
+            __m256d elem   = _mm256_loadu_pd(addr + nel);
+		    __m256d result = _mm256_sub_pd(elem_a, elem);
+            _mm256_storeu_pd(addr+nel, result);
         }
-        if(rem_elem != tot_elem) {
- 		ElementN(nel) -= (double)matra.ElementN(nel);
+        while(nel < tot_elem) {
+ 		    ElementN(nel) -= (double)matra.ElementN(nel);
+            nel++;
         }
     }
 
@@ -690,18 +697,18 @@ class ChMatrix {
 	float *addr = (float*) GetAddress();
         const float* a_addr = (const float*)matra.GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%4;
+        unsigned int rem_elem = tot_elem - tot_elem%8;
         int nel;
-        for(nel = 0; nel<rem_elem; nel += 4) {
-		__m128 elem_a = _mm_load_ps(a_addr+nel);
-                __m128 elem   = _mm_load_ps(addr + nel);
-		__m128 result = _mm_sub_ps(elem_a, elem);
-                _mm_store_ps(addr+nel, result);
+        for(nel = 0; nel<rem_elem; nel += 8) {
+		        __m256 elem_a = _mm256_loadu_ps(a_addr+nel);
+                __m256 elem   = _mm256_loadu_ps(addr + nel);
+		        __m256 result = _mm256_sub_ps(elem_a, elem);
+                _mm256_storeu_ps(addr+nel, result);
         }
         if(rem_elem != tot_elem) {
                 for(nel=rem_elem; nel<tot_elem; nel++){
-	 		ElementN(nel) -= (float)matra.ElementN(nel);
-     		}
+	 		        ElementN(nel) -= (float)matra.ElementN(nel);
+     		    }
         }
     }
 
@@ -725,16 +732,18 @@ class ChMatrix {
     void vec_MatrScale(double factor) {
         double *addr = (double*) GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        __m128d scale = _mm_set1_pd(factor);
-          for(nel=0; nel< rem_elem; nel+=2) {
-	    __m128d elem_a = _mm_load_pd(addr+nel);
-            __m128d result = _mm_mul_pd(elem_a, scale);
-            _mm_store_pd(addr+nel,result);
+        __m256d scale = _mm256_set1_pd(factor);
+          for(nel=0; nel< rem_elem; nel+=4) {
+	    __m256d elem_a = _mm256_loadu_pd(addr+nel);
+            __m256d result = _mm256_mul_pd(elem_a, scale);
+            _mm256_storeu_pd(addr+nel,result);
         }
-          if(rem_elem != tot_elem)
+         while(nel < tot_elem){
             ElementN(nel) *= factor;
+            nel++;
+        }
     }
 
 
@@ -743,13 +752,13 @@ class ChMatrix {
     void vec_MatrScale(float factor) {
         float *addr = (float* )GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem % 4;
+        unsigned int rem_elem = tot_elem - tot_elem % 8;
         int nel;
-        __m128 scale = _mm_set1_ps(factor);
-          for(nel=0; nel< rem_elem; nel+=4) {
-	    __m128 elem_a = _mm_load_ps(addr+nel);
-            __m128 result = _mm_mul_ps(elem_a, scale);
-            _mm_store_ps(addr+nel,result);
+        __m256 scale = _mm_set1_ps(factor);
+          for(nel=0; nel< rem_elem; nel+=8) {
+	        __m256 elem_a = _mm256_loadu_ps(addr+nel);
+            __m256 result = _mm256_mul_ps(elem_a, scale);
+            _mm256_storeu_ps(addr+nel,result);
         }
           if(rem_elem != tot_elem){
              for(nel=rem_elem; nel<tot_elem; nel++){
@@ -780,31 +789,33 @@ class ChMatrix {
         const double* a_addr = matra.GetAddress();
         double * addr = GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%2;
+        unsigned int rem_elem = tot_elem - tot_elem%4;
         int nel;
-        for(nel=0; nel < rem_elem; nel+=2) {
-           __m128d scale = _mm_load_pd(a_addr+nel);
-           __m128d matrix= _mm_load_pd(addr+nel);
-           __m128d res = _mm_mul_pd(scale,matrix);
-           _mm_store_pd(addr+nel, res);
+        for(nel=0; nel < rem_elem; nel+=4) {
+           __m256d scale = _mm256_loadu_pd(a_addr+nel);
+           __m256d matrix= _mm256_loadu_pd(addr+nel);
+           __m256d res = _mm256_mul_pd(scale,matrix);
+           _mm256_storeu_pd(addr+nel, res);
         }
-        if(rem_elem != tot_elem)
+        while(nel< tot_elem) {
            ElementN(nel) *= (Real)matra.ElementN(nel);
+           nel++;
+        }
     }
 
     void vec_MatrScale(const ChMatrix<float>& matra) {
         const float* a_addr = matra.GetAddress();
         float * addr = GetAddress();
         unsigned int tot_elem = rows*columns;
-        unsigned int rem_elem = tot_elem - tot_elem%4;
+        unsigned int rem_elem = tot_elem - tot_elem%8;
         int nel;
-        for(nel=0; nel < rem_elem; nel+=4) {
-           __m128 scale = _mm_load_ps(a_addr+nel);
-           __m128 matrix= _mm_load_ps(addr+nel);
-           __m128 res = _mm_mul_ps(scale,matrix);
-           _mm_store_ps(addr+nel, res);
+        for(nel=0; nel < rem_elem; nel+=8) {
+           __m256 scale = _mm256_loadu_ps(a_addr+nel);
+           __m256 matrix= _mm256_loadu_ps(addr+nel);
+           __m256 res = _mm256_mul_ps(scale,matrix);
+           _mm256_storeu_ps(addr+nel, res);
         }
-        if(nel != tot_elem-1)
+        if(rem_elem != tot_elem)
              for(nel=rem_elem; nel<tot_elem;nel++)
                   ElementN(nel) *= (Real)matra.ElementN(nel);
     }
@@ -909,8 +920,8 @@ class ChMatrix {
 	const int mask = 0x31;
 	double part_sum = 0;
 	for(nel=0; nel < rem_size ; nel += 2) {
-		__m128d a_elem = _mm_load_pd(a_addr+nel);	
-           	__m128d b_elem = _mm_load_pd(b_addr+nel);
+		__m128d a_elem = _mm_loadu_pd(a_addr+nel);	
+           	__m128d b_elem = _mm_loadu_pd(b_addr+nel);
 		__m128d result = _mm_dp_pd(a_elem, b_elem, mask);	
 		_mm_storel_pd(&part_sum, result);
            	total += part_sum;
@@ -934,8 +945,8 @@ class ChMatrix {
 	const int mask = 0xF1;  //Perform DotProduct on all the 4 float values and store it in R3.
 	float part_sum = 0;
 	for(nel=0; nel < rem_size ; nel += 4) {
-		__m128 a_elem = _mm_load_ps(a_addr+nel);	
-           	__m128 b_elem = _mm_load_ps(b_addr+nel);
+		__m128 a_elem = _mm256_loadu_ps(a_addr+nel);	
+           	__m128 b_elem = _mm_loadu_ps(b_addr+nel);
 		__m128 result = _mm_dp_ps(a_elem, b_elem, mask);	
 		_mm_store_ss(&part_sum, result);
            	total += part_sum;
