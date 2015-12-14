@@ -7,6 +7,7 @@ SET(TESTS
     test_math
     test_sharedptr
     test_matrix
+    test_quaternion
     #test_stream
 )
 
